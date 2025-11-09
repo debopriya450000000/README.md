@@ -1,8 +1,9 @@
 import streamlit as st
 
-st.title("Hello World 🌍")
-st.write("My first Streamlit deployment!")
-
+st.title("😴 Sleep Schedule Prediction App")
+st.write("Machine Learning Mini Project ")
+📎 Project Resources
+https://github.com/debopriya450000000/README.md
 
 # sleep_prediction_app.py
 import streamlit as st
