@@ -119,17 +119,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 # 💤 Title & Introduction
 # -----------------------------------------------
 
-# -----------------------------------------------
-# 📂 Upload CSV or use default dataset
-# -----------------------------------------------
-uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"], key="sleep_upload")
-
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.success("✅ File uploaded successfully!")
-else:
-    st.info("Using default dataset.")
-    df = pd.read_csv("Data Collection for ML mini project (Responses) - Form Responses 1.csv")
 
 # -----------------------------------------------
 # 🧹 Data Preprocessing
