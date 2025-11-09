@@ -286,3 +286,83 @@ with st.expander("📊 View Processed Dataset"):
     st.dataframe(sleep_df.head())
 
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+# --- App Title ---
+st.title("💤 Sleep Health Prediction App")
+
+st.write("Upload your dataset or use the default one to predict average sleep hours per day.")
+
+# --- Upload CSV (with unique key to avoid duplicate ID error) ---
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"], key="sleep_data_upload")
+
+# --- Load dataset ---
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.success("✅ File uploaded successfully!")
+else:
+    st.info("Using default dataset.")
+    df = pd.read_csv("Data Collection for ML mini project (Responses) - Form Responses 1.csv")
+
+# --- Select relevant columns ---
+selected_cols = [
+    "  Daily Social Media Minutes  \n(Provide values in integer between 0-600)",
+    "  Gaming hours per week  \n(Provide Values in integer between 0-50)",
+    "  Introversion extraversion  "
+]
+
+sleep_df = df[selected_cols].copy()
+sleep_df.columns = [
+    "daily_social_media_minutes",
+    "gaming_hours_per_week",
+    "introversion_extraversion"
+]
+
+# --- Data cleaning ---
+for col in sleep_df.columns:
+    sleep_df[col] = pd.to_numeric(
+        sleep_df[col].astype(str).str.extract(r"(\d+)")[0],
+        errors="coerce"
+    )
+
+sleep_df.fillna(sleep_df.median(), inplace=True)
+
+# --- Create synthetic target variable ---
+np.random.seed(42)
+sleep_df["sleep_hours"] = (
+    10
+    - 0.005 * sleep_df["daily_social_media_minutes"]
+    - 0.05 * sleep_df["gaming_hours_per_week"]
+    + 0.3 * sleep_df["introversion_extraversion"]
+    + np.random.normal(0, 0.5, len(sleep_df))
+).clip(4, 10)
+
+# --- Model training ---
+X = sleep_df[["daily_social_media_minutes", "gaming_hours_per_week", "introversion_extraversion"]]
+y = sleep_df["sleep_hours"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# --- User Input for Prediction ---
+st.subheader("Try Your Own Prediction 👇")
+
+social_media = st.number_input("Daily Social Media Minutes", min_value=0, max_value=600, value=120)
+gaming = st.number_input("Gaming Hours per Week", min_value=0, max_value=50, value=10)
+intro_extro = st.slider("Introversion-Extraversion (1 = Introvert, 10 = Extrovert)", 1, 10, 5)
+
+# --- Predict ---
+user_input = np.array([[social_media, gaming, intro_extro]])
+predicted_sleep = model.predict(user_input)[0]
+
+st.success(f"🛌 Predicted Average Sleep Hours: **{predicted_sleep:.2f} hours/night**")
+
+# --- Show processed dataset ---
+with st.expander("📊 View Processed Dataset"):
+    st.dataframe(sleep_df.head())
+    st.write(f"**Cleaned dataset shape:** {sleep_df.shape}")
