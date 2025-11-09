@@ -91,7 +91,11 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 st.title("🧠 Sleep Health Prediction App")
 
 st.subheader("Upload your dataset or use default")
-uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+uploaded_file = st.file_uploader(
+    "Upload CSV File",
+    type=["csv"], # Using list notation is better practice
+    key="sleep_data_uploader_1" # <-- Add a unique key here
+)
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
@@ -377,6 +381,3 @@ sns.heatmap(sleep_df.corr(), annot=True, cmap="Blues", fmt=".2f")
 plt.title("Correlation Heatmap")
 plt.show()
 
-# Pairplot
-sns.pairplot(sleep_df, diag_kind="kde")
-plt.show()
