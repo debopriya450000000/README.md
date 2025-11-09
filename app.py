@@ -2,6 +2,11 @@ import streamlit as st
 
 st.title("😴 Sleep Schedule Prediction App")
 st.write("Machine Learning Mini Project ")
+st.write("""
+This app predicts your **average sleep hours per night** 
+based on your social media usage, gaming time, and personality type.
+""")
+
 
 # sleep_prediction_app.py
 import streamlit as st
@@ -13,7 +18,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-st.title("😴 Sleep Schedule Prediction App")
 
 # Step 1: Upload or Load Dataset
 st.subheader("📂 Upload Dataset or Use Default")
@@ -114,12 +118,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 # -----------------------------------------------
 # 💤 Title & Introduction
 # -----------------------------------------------
-st.set_page_config(page_title="Sleep Schedule Predictor", page_icon="😴", layout="centered")
-st.title("😴 Sleep Schedule Prediction App")
-st.write("""
-This app predicts your **average sleep hours per night** 
-based on your social media usage, gaming time, and personality type.
-""")
 
 # -----------------------------------------------
 # 📂 Upload CSV or use default dataset
