@@ -366,3 +366,17 @@ st.success(f"🛌 Predicted Average Sleep Hours: **{predicted_sleep:.2f} hours/n
 with st.expander("📊 View Processed Dataset"):
     st.dataframe(sleep_df.head())
     st.write(f"**Cleaned dataset shape:** {sleep_df.shape}")
+
+
+# Summary statistics
+sleep_df.describe()
+
+# Correlation heatmap
+plt.figure(figsize=(8,6))
+sns.heatmap(sleep_df.corr(), annot=True, cmap="Blues", fmt=".2f")
+plt.title("Correlation Heatmap")
+plt.show()
+
+# Pairplot
+sns.pairplot(sleep_df, diag_kind="kde")
+plt.show()
