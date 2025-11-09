@@ -4,85 +4,154 @@ st.title("Hello World 🌍")
 st.write("My first Streamlit deployment!")
 
 
-# 📘 Sleep Health Report - Regression (Supervised Learning)
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-# Step 1: Import libraries
-import pandas as pd # pyright: ignore[reportMissingModuleSource]
-import numpy as np # pyright: ignore[reportMissingImports]
-import matplotlib.pyplot as plt # type: ignore
-import seaborn as sns # type: ignore
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+st.title("🧠 Sleep Health Prediction App")
 
-from sklearn.model_selection import train_test_split # type: ignore
-from sklearn.linear_model import LinearRegression # type: ignore
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score # type: ignore
+st.subheader("Upload your dataset or use default")
 
-# Step 2: Load dataset
-file_path = "Data Collection for ML mini project (Responses) - Form Responses 1.csv"
-df = pd.read_csv(file_path)
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
-# Step 3: Select required features
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+else:
+    file_path = "Data Collection for ML mini project (Responses) - Form Responses 1.csv"
+    df = pd.read_csv(file_path)
+
+st.write("### Dataset Preview:")
+st.dataframe(df.head())
 cols = {
     "social_media": "  Daily Social Media Minutes  \n(Provide values in integer between 0-600)",
     "gaming_hours": "  Gaming hours per week  \n(Provide Values in integer between 0-50)",
     "intro_extro": "  Introversion extraversion  "
 }
-data = df[[cols["social_media"], cols["gaming_hours"], cols["intro_extro"]]].copy()
 
-# Step 4: Clean column names
+data = df[[cols["social_media"], cols["gaming_hours"], cols["intro_extro"]]].copy()
 data.columns = ["social_media_minutes", "gaming_hours_per_week", "introversion_extraversion"]
 
-# Step 5: Convert to numeric (handle messy entries like '120 cm')
+# Convert messy entries (like "120 mins") into numbers
 for col in data.columns:
-    data[col] = pd.to_numeric(data[col].astype(str).str.extract("(\d+)")[0], errors="coerce")
+    data[col] = pd.to_numeric(data[col].astype(str).str.extract(r"(\d+)")[0], errors="coerce")
 
-# Step 6: Handle missing values (fill with median)
+# Fill missing values
 data = data.fillna(data.median())
 
-# Step 7: Create synthetic target (sleep_hours)
-# Assume: more social media/gaming → less sleep, more introversion → more sleep
-np.random.seed(42)
-data["sleep_hours"] = (
-    10
-    - 0.005 * data["social_media_minutes"]
-    - 0.05 * data["gaming_hours_per_week"]
-    + 0.3 * data["introversion_extraversion"]
-    + np.random.normal(0, 0.5, len(data))
-).clip(4, 10)  # limit between 4-10 hrs
-
-# Step 8: Explore dataset
-print(data.head())
-sns.pairplot(data, diag_kind="kde")
-plt.show()
-
-# Step 9: Train-test split
-X = data[["social_media_minutes", "gaming_hours_per_week", "introversion_extraversion"]]
-y = data["sleep_hours"]
+st.write("### Cleaned Data:")
+st.dataframe(data.head())
+# Split data (80% training, 20% testing)
+X = data[["social_media_minutes", "gaming_hours_per_week"]]
+y = data["introversion_extraversion"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Step 10: Train regression model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Step 11: Predictions
 y_pred = model.predict(X_test)
 
-# Step 12: Evaluation
-print("Mean Absolute Error:", mean_absolute_error(y_test, y_pred))
-print("Mean Squared Error:", mean_squared_error(y_test, y_pred))
-print("R² Score:", r2_score(y_test, y_pred))
+# Evaluation
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
 
-# Step 13: Coefficients
-coef_df = pd.DataFrame({
-    "Feature": X.columns,
-    "Coefficient": model.coef_
-})
-print(coef_df)
+st.subheader("📊 Model Performance")
+st.write(f"**Mean Absolute Error:** {mae:.2f}")
+st.write(f"**Mean Squared Error:** {mse:.2f}")
+st.write(f"**R² Score:** {r2:.2f}")
+st.subheader("🎯 Predict Introversion/Extraversion")
 
-# Step 14: Plot Actual vs Predicted
-plt.scatter(y_test, y_pred, alpha=0.7)
-plt.xlabel("Actual Sleep Hours")
-plt.ylabel("Predicted Sleep Hours")
-plt.title("Actual vs Predicted Sleep Hours")
-plt.plot([4, 10], [4, 10], 'r--')
-plt.show()
+social_media = st.number_input("Daily Social Media Minutes", 0, 600, 120)
+gaming_hours = st.number_input("Gaming Hours per Week", 0, 50, 5)
+
+if st.button("Predict Personality Score"):
+    pred = model.predict([[social_media, gaming_hours]])[0]
+    st.success(f"Predicted Personality Score: {pred:.2f}")
+st.subheader("📈 Relationship between Features")
+fig, ax = plt.subplots()
+sns.scatterplot(x=data["social_media_minutes"], y=data["introversion_extraversion"], ax=ax)
+ax.set_xlabel("Social Media Minutes")
+ax.set_ylabel("Personality Score")
+st.pyplot(fig)
+import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+st.title("🧠 Sleep Health Prediction App")
+
+st.subheader("Upload your dataset or use default")
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+else:
+    file_path = "Data Collection for ML mini project (Responses) - Form Responses 1.csv"
+    df = pd.read_csv(file_path)
+
+st.write("### Dataset Preview:")
+st.dataframe(df.head())
+
+# Clean and preprocess
+cols = {
+    "social_media": "  Daily Social Media Minutes  \n(Provide values in integer between 0-600)",
+    "gaming_hours": "  Gaming hours per week  \n(Provide Values in integer between 0-50)",
+    "intro_extro": "  Introversion extraversion  "
+}
+
+data = df[[cols["social_media"], cols["gaming_hours"], cols["intro_extro"]]].copy()
+data.columns = ["social_media_minutes", "gaming_hours_per_week", "introversion_extraversion"]
+
+for col in data.columns:
+    data[col] = pd.to_numeric(data[col].astype(str).str.extract(r"(\d+)")[0], errors="coerce")
+
+data = data.fillna(data.median())
+
+st.write("### Cleaned Data:")
+st.dataframe(data.head())
+
+# Train model
+X = data[["social_media_minutes", "gaming_hours_per_week"]]
+y = data["introversion_extraversion"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+st.subheader("📊 Model Performance")
+st.write(f"**Mean Absolute Error:** {mae:.2f}")
+st.write(f"**Mean Squared Error:** {mse:.2f}")
+st.write(f"**R² Score:** {r2:.2f}")
+
+# Prediction UI
+st.subheader("🎯 Predict Introversion/Extraversion")
+social_media = st.number_input("Daily Social Media Minutes", 0, 600, 120)
+gaming_hours = st.number_input("Gaming Hours per Week", 0, 50, 5)
+
+if st.button("Predict Personality Score"):
+    pred = model.predict([[social_media, gaming_hours]])[0]
+    st.success(f"Predicted Personality Score: {pred:.2f}")
+
+# Visualization
+st.subheader("📈 Relationship between Features")
+fig, ax = plt.subplots()
+sns.scatterplot(x=data["social_media_minutes"], y=data["introversion_extraversion"], ax=ax)
+ax.set_xlabel("Social Media Minutes")
+ax.set_ylabel("Personality Score")
+st.pyplot(fig)
